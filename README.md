@@ -17,7 +17,7 @@ Automatically export all your VS Code Copilot chat sessions to JSON and Markdown
 ### 1. Clone or Download
 
 ```bash
-git clone <repo> copilot-chat-exporter
+git clone https://github.com/[your-github-username]/copilot-chat-exporter.git
 cd copilot-chat-exporter
 ```
 
@@ -206,7 +206,11 @@ C:\Users\YourUsername\.copilot_exporter_config.json
 ## Sharing with Colleagues
 
 1. **Create a repo** (GitHub, GitLab, etc.) with these files
-2. **Have colleagues clone it** to their machines
+2. **Have colleagues clone it** to their machines:
+   ```bash
+   git clone https://github.com/[your-username]/copilot-chat-exporter.git
+   cd copilot-chat-exporter
+   ```
 3. **Each person runs:**
    ```bash
    python export_copilot_history.py --setup

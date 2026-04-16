@@ -39,7 +39,7 @@ If you see `3.7.0` or higher, you're good! If not, [download Python](https://www
 ### **Step 1: Clone the Repository**
 
 ```bash
-git clone https://github.com/nchandik/copilot-chat-exporter.git
+git clone https://github.com/[your-github-username]/copilot-chat-exporter.git
 cd copilot-chat-exporter
 ```
 
@@ -248,7 +248,7 @@ Use for: Reading, sharing, documentation
 **Example:**
 ```json
 {
-  "output_dir": "C:\\Users\\Satish\\Documents\\Copilot-History",
+  "output_dir": "C:\\Users\\YourName\\Documents\\Copilot-History",
   "export_time": "18:00",
   "timezone": "IST",
   "created_at": "2026-04-16T19:31:52.303648",
@@ -556,7 +556,7 @@ What does "session files" mean?
 **Having issues?**
 1. Check this guide's **Troubleshooting** section
 2. Run `python export_copilot_history.py --help`
-3. Check [GitHub Issues](https://github.com/nchandik/copilot-chat-exporter/issues)
+3. Check [GitHub Issues](https://github.com/[your-github-username]/copilot-chat-exporter/issues)
 
 **Want to contribute?**
 - Submit pull requests or issues on GitHub

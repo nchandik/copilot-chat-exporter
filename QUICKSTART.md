@@ -31,7 +31,7 @@ Paste this prompt in Copilot Chat:
 
 ```
 I need to clone this GitHub repository:
-https://github.com/nchandik/copilot-chat-exporter.git
+https://github.com/[your-github-username]/copilot-chat-exporter.git
 
 Guide me step-by-step:
 1. Where should I clone it on my Windows computer?
