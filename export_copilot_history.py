@@ -51,19 +51,19 @@ def save_config(config):
             json.dump(config, f, indent=2)
         return True
     except Exception as e:
-        print(f"⚠ Warning: Could not save config: {e}")
+        print(f"[WARN] Warning: Could not save config: {e}")
         return False
 
 
 def interactive_setup():
     """Interactive first-time setup."""
     print("\n" + "="*50)
-    print("🎉 Welcome to Copilot Chat History Exporter!")
+    print("[DONE] Welcome to Copilot Chat History Exporter!")
     print("="*50)
     print("\nLet's set up your preferences for the first time.\n")
 
     # Ask for output directory
-    print("1️⃣  Where should we save your chat history files?")
+    print("[1]  Where should we save your chat history files?")
     print("   (Press Enter for default: Documents\\Copilot-History)")
     
     default_output = os.path.join(str(Path.home()), "Documents", "Copilot-History")
@@ -78,7 +78,7 @@ def interactive_setup():
     os.makedirs(output_dir, exist_ok=True)
 
     # Ask for export time (timezone aware)
-    print("\n2️⃣  What time should we export your chat history?")
+    print("\n[2]  What time should we export your chat history?")
     print("   (Consider your timezone)")
     print("   • Indian Standard Time (IST): 18:00 = 6:00 PM")
     print("   • US Eastern Time (EST): 18:00 = 6:00 PM")
@@ -96,11 +96,11 @@ def interactive_setup():
             datetime.strptime(user_time, "%H:%M")
             export_time = user_time
         except ValueError:
-            print("   ⚠ Invalid format. Using default: 23:00")
+            print("   [WARN] Invalid format. Using default: 23:00")
             export_time = "23:00"
 
     # Ask for timezone info (for reference only)
-    print("\n3️⃣  What's your timezone?")
+    print("\n[3]  What's your timezone?")
     print("   • IST (Indian Standard Time, UTC+5:30)")
     print("   • EST (US Eastern, UTC-5)")
     print("   • CST (US Central, UTC-6)")
@@ -125,13 +125,13 @@ def interactive_setup():
     save_config(config)
 
     print("\n" + "="*50)
-    print("✅ Setup complete!")
+    print("[OK] Setup complete!")
     print("="*50)
     print(f"\nYour preferences:")
-    print(f"  📁 Output directory: {output_dir}")
-    print(f"  🕐 Export time: {export_time} daily ({timezone_input})")
+    print(f"  [DIR] Output directory: {output_dir}")
+    print(f"  [TIME] Export time: {export_time} daily ({timezone_input})")
     print(f"\nConfig saved to: {get_config_file()}")
-    print("\n⏭️  Next step: Set up Windows Task Scheduler")
+    print("\n[SKIP]  Next step: Set up Windows Task Scheduler")
     print("   Run: schedule_daily.bat (as Administrator)")
     print("   Or:  schedule_daily.ps1 (in PowerShell, as Administrator)")
 
@@ -167,7 +167,7 @@ def find_session_files(target_date, workspace_root=None):
         workspace_root = get_workspace_storage_root()
 
     if not os.path.isdir(workspace_root):
-        print(f"⚠ Workspace root not found: {workspace_root}")
+        print(f"[WARN] Workspace root not found: {workspace_root}")
         return []
 
     session_files = []
@@ -236,7 +236,7 @@ def parse_session_file(filepath):
         with open(filepath, "r", encoding="utf-8") as f:
             lines = [line.strip() for line in f if line.strip()]
     except Exception as e:
-        print(f"⚠ Error reading {filepath}: {e}")
+        print(f"[WARN] Error reading {filepath}: {e}")
         return entries
 
     objs = []
@@ -420,6 +420,99 @@ Best-effort extraction from VS Code Copilot chat session files modified on this 
     return output_file
 
 
+# ===================== DATE HANDLING & INTERACTIVE PROMPTS =====================
+
+def calculate_date_from_days_ago(days_ago, timezone=None):
+    """Calculate target date by subtracting days from today."""
+    if days_ago < 0:
+        raise ValueError("days_ago must be >= 0")
+    
+    target = datetime.now() - timedelta(days=days_ago)
+    return target.strftime("%Y-%m-%d")
+
+
+def parse_custom_date(date_str):
+    """Parse and validate a custom date string."""
+    try:
+        dt = datetime.strptime(date_str, "%Y-%m-%d")
+        # Check if date is in the future
+        if dt > datetime.now():
+            raise ValueError("Date is in the future")
+        return dt.strftime("%Y-%m-%d")
+    except ValueError as e:
+        raise ValueError(f"Invalid date: {e}")
+
+
+def interactive_date_picker():
+    """Interactive prompt to select export date."""
+    today = datetime.now()
+    yesterday = today - timedelta(days=1)
+    two_days_ago = today - timedelta(days=2)
+    week_ago = today - timedelta(days=7)
+    
+    print("\n" + "="*60)
+    print("[DATE] Which date would you like to export?")
+    print("="*60)
+    print(f"\n  1) Today ({today.strftime('%Y-%m-%d')})")
+    print(f"  2) Yesterday ({yesterday.strftime('%Y-%m-%d')})")
+    print(f"  3) Two days ago ({two_days_ago.strftime('%Y-%m-%d')})")
+    print(f"  4) One week ago ({week_ago.strftime('%Y-%m-%d')})")
+    print(f"  5) Custom date (enter YYYY-MM-DD)")
+    print(f"\nEnter your choice (1-5): ", end="")
+    
+    while True:
+        choice = input().strip()
+        
+        if choice == "1":
+            return today.strftime("%Y-%m-%d")
+        elif choice == "2":
+            return yesterday.strftime("%Y-%m-%d")
+        elif choice == "3":
+            return two_days_ago.strftime("%Y-%m-%d")
+        elif choice == "4":
+            return week_ago.strftime("%Y-%m-%d")
+        elif choice == "5":
+            print("Enter date (YYYY-MM-DD): ", end="")
+            custom = input().strip()
+            try:
+                return parse_custom_date(custom)
+            except ValueError as e:
+                print(f"[ERROR] {e}")
+                print("Enter date (YYYY-MM-DD): ", end="")
+                continue
+        else:
+            print("[ERROR] Invalid choice. Please enter 1-5: ", end="")
+            continue
+
+
+def check_file_exists_and_prompt(output_dir, target_date):
+    """Check if export files exist and prompt user for action."""
+    json_file = os.path.join(output_dir, f"prompt_response_history_{target_date}.json")
+    md_file = os.path.join(output_dir, f"prompt_response_history_{target_date}.md")
+    
+    if os.path.exists(json_file) or os.path.exists(md_file):
+        print(f"\n[WARN]️  Files already exist for {target_date}")
+        if os.path.exists(json_file):
+            print(f"   • {os.path.basename(json_file)}")
+        if os.path.exists(md_file):
+            print(f"   • {os.path.basename(md_file)}")
+        
+        while True:
+            print("\nWhat would you like to do?")
+            print("  (O)verwrite  (C)ancel: ", end="")
+            choice = input().strip().lower()
+            
+            if choice in ("o", "overwrite"):
+                return True
+            elif choice in ("c", "cancel"):
+                return False
+            else:
+                print("[ERROR] Invalid choice. Enter 'o' or 'c': ", end="")
+                continue
+    
+    return True
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Export VS Code Copilot chat history to JSON and Markdown"
@@ -433,6 +526,18 @@ def main():
         "--date",
         default=None,
         help="Target date in YYYY-MM-DD format (default: today)",
+    )
+    parser.add_argument(
+        "--days-ago",
+        type=int,
+        default=None,
+        help="Export date N days ago (0=today, 1=yesterday, etc.)",
+    )
+    parser.add_argument(
+        "--batch",
+        type=int,
+        default=None,
+        help="Export last N days in one go (e.g., --batch 7 for last week)",
     )
     parser.add_argument(
         "--setup",
@@ -449,19 +554,39 @@ def main():
     # Load or create config
     config = load_config()
     if config is None:
-        print("\n🔧 First time setup required...\n")
+        print("\n[SETUP] First time setup required...\n")
         config = interactive_setup()
 
-    # Determine target date
-    if args.date:
-        target_date = args.date
+    # Validate command line arguments
+    if args.days_ago is not None and args.days_ago < 0:
+        print(f"[ERROR] days-ago must be >= 0 (got {args.days_ago})")
+        sys.exit(1)
+    
+    if args.batch is not None and args.batch < 1:
+        print(f"[ERROR] batch must be >= 1 (got {args.batch})")
+        sys.exit(1)
+
+    # Determine target dates
+    target_dates = []
+    
+    if args.batch:
+        # Export last N days
+        for i in range(args.batch):
+            target_dates.append(calculate_date_from_days_ago(i))
+    elif args.days_ago is not None:
+        # Export specific days ago
+        target_dates.append(calculate_date_from_days_ago(args.days_ago))
+    elif args.date:
+        # Export specific date (validate format and ensure not in future)
         try:
-            datetime.strptime(target_date, "%Y-%m-%d")
-        except ValueError:
-            print(f"❌ Invalid date format: {target_date}. Use YYYY-MM-DD")
+            validated_date = parse_custom_date(args.date)
+            target_dates.append(validated_date)
+        except ValueError as e:
+            print(f"[ERROR] {e}")
             sys.exit(1)
     else:
-        target_date = datetime.now().strftime("%Y-%m-%d")
+        # Interactive mode: ask user which date
+        target_dates.append(interactive_date_picker())
 
     # Determine output directory (command-line arg overrides config)
     if args.output_dir:
@@ -471,48 +596,66 @@ def main():
 
     os.makedirs(output_dir, exist_ok=True)
 
-    print(f"📅 Exporting Copilot chat history for {target_date}")
-    print(f"📁 Output directory: {output_dir}")
-    print(f"🕐 Configured export time: {config.get('export_time')} ({config.get('timezone')})")
+    # Process each date
+    total_exported = 0
+    for target_date in target_dates:
+        print(f"\n{'='*60}")
+        print(f"[DATE] Exporting Copilot chat history for {target_date}")
+        print(f"{'='*60}")
+        print(f"[DIR] Output directory: {output_dir}")
+        print(f"[TIME] Configured export time: {config.get('export_time')} ({config.get('timezone')})")
 
-    # Find session files
-    try:
-        session_files = find_session_files(target_date)
-    except Exception as e:
-        print(f"❌ Error finding session files: {e}")
-        sys.exit(1)
+        # Check if files exist
+        if not check_file_exists_and_prompt(output_dir, target_date):
+            print(f"[SKIP]  Skipping {target_date}")
+            continue
 
-    if not session_files:
-        print(f"⚠ No session files found for {target_date}")
-        print(f"  (Searched in: {get_workspace_storage_root()})")
-        return
+        # Find session files
+        try:
+            session_files = find_session_files(target_date)
+        except Exception as e:
+            print(f"[ERROR] Error finding session files: {e}")
+            continue
 
-    print(f"✅ Found {len(session_files)} session file(s)")
+        if not session_files:
+            print(f"[WARN] No session files found for {target_date}")
+            print(f"  (Searched in: {get_workspace_storage_root()})")
+            continue
 
-    # Parse all session files
-    all_entries = []
-    for filepath in session_files:
-        print(f"  • Parsing {os.path.basename(filepath)}...")
-        entries = parse_session_file(filepath)
-        all_entries.extend(entries)
+        print(f"[OK] Found {len(session_files)} session file(s)")
 
-    print(f"📝 Total entries before dedup: {len(all_entries)}")
+        # Parse all session files
+        all_entries = []
+        for filepath in session_files:
+            print(f"  • Parsing {os.path.basename(filepath)}...")
+            entries = parse_session_file(filepath)
+            all_entries.extend(entries)
 
-    # Deduplicate
-    final_entries = deduplicate_entries(all_entries)
-    print(f"✂️  After dedup: {len(final_entries)} entries")
+        print(f"[INFO] Total entries before dedup: {len(all_entries)}")
 
-    # Export
-    try:
-        json_file = export_to_json(final_entries, session_files, target_date, output_dir)
-        print(f"✅ JSON: {json_file}")
+        # Deduplicate
+        final_entries = deduplicate_entries(all_entries)
+        print(f"[DEDUP]  After dedup: {len(final_entries)} entries")
 
-        md_file = export_to_markdown(final_entries, target_date, output_dir)
-        print(f"✅ Markdown: {md_file}")
+        # Export
+        try:
+            json_file = export_to_json(final_entries, session_files, target_date, output_dir)
+            print(f"[OK] JSON: {json_file}")
 
-        print(f"\n🎉 Export complete!")
-    except Exception as e:
-        print(f"❌ Error exporting: {e}")
+            md_file = export_to_markdown(final_entries, target_date, output_dir)
+            print(f"[OK] Markdown: {md_file}")
+
+            total_exported += 1
+        except Exception as e:
+            print(f"[ERROR] Error exporting: {e}")
+            continue
+
+    if total_exported > 0:
+        print(f"\n{'='*60}")
+        print(f"[DONE] Export complete! ({total_exported} date(s) exported)")
+        print(f"{'='*60}")
+    else:
+        print(f"\n[WARN] No dates were exported")
         sys.exit(1)
 
 
