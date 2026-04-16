@@ -1,95 +1,115 @@
 # Quick Start Guide (5 Minutes)
 
-For colleagues who want to get started immediately.
+**Use Copilot Chat to guide you through setup. Just copy & paste the prompts below!**
 
 ---
 
-## ✅ Prerequisites Check
+## 📋 Step 1: Verify Prerequisites
 
-Before starting, verify you have:
-- **Windows 10+**
-- **Python 3.7+** (run: `python --version`)
-- **VS Code with Copilot Chat** (visible in left sidebar)
-- **Git** (to clone the repo)
+Open **Copilot Chat** in VS Code (Ctrl+L or click the chat icon).
 
-**Using Copilot Chat for help?** Copy any prompt from the **[COPILOT_PROMPTS.md](COPILOT_PROMPTS.md)** file for step-by-step interactive guidance.
+Copy and paste this prompt:
+
+```
+I want to use the Copilot Chat History Exporter.
+Help me verify I have all the prerequisites:
+1. What Windows version do I need?
+2. How do I check my Windows version?
+3. How do I check if Python 3.7+ is installed?
+4. How do I check if VS Code has Copilot Chat enabled?
+
+Give me exact steps to verify each requirement.
+```
+
+✅ **Do this first** — Stop if anything is missing and install it.
 
 ---
 
-## 🚀 3-Step Setup
+## 🚀 Step 2: Clone the Repository
 
-### Step 1: Clone & Interactive Configuration
+Paste this prompt in Copilot Chat:
 
-```bash
-git clone https://github.com/nchandik/copilot-chat-exporter.git
-cd copilot-chat-exporter
-python export_copilot_history.py --setup
 ```
+I need to clone this GitHub repository:
+https://github.com/nchandik/copilot-chat-exporter.git
 
-You'll be asked:
-1. **Where to save files?** → Press Enter for default or choose a path
-2. **What time to export?** → Enter `18:00` (6:00 PM) or your preferred time
-3. **Your timezone?** → Choose: IST, EST, CST, MST, or PST
-
-✅ Config saved to: `C:\Users\YourUsername\.copilot_exporter_config.json`
-
-### Step 2: Test It Works
-
-```bash
-python export_copilot_history.py
-```
-
-Check for success:
-```
-✅ JSON: C:\...\prompt_response_history_2026-04-16.json
-✅ Markdown: C:\...\prompt_response_history_2026-04-16.md
-🎉 Export complete!
-```
-
-### Step 3: Schedule Daily Automation
-
-**Easiest — Right-click as Admin:**
-```bash
-schedule_daily.bat
-```
-
-**Alternative — PowerShell:**
-```powershell
-.\schedule_daily.ps1
-```
-
-Done! Exports run automatically at your chosen time.
-
----
-
-## ✨ That's It!
-
-Your chat history now exports daily in both JSON (structured) and Markdown (readable) formats.
-
----
-
-## 🎯 Common Next Steps
-
-**Verify scheduling works:**
-1. Press `Win + R`
-2. Type `taskschd.msc`
-3. Look for **"Copilot Chat History Export"**
-4. Right-click → **Run** to test
-
-**Reconfigure later:**
-```bash
-python export_copilot_history.py --setup
-```
-
-**Export a past date:**
-```bash
-python export_copilot_history.py --date 2026-04-15
+Guide me step-by-step:
+1. Where should I clone it on my Windows computer?
+2. What command should I run?
+3. How do I navigate to the cloned folder?
+4. How do I verify it cloned successfully?
 ```
 
 ---
 
-## ❓ Need Help?
+## ⚙️ Step 3: Complete Setup
 
-- **Prefer interactive guidance?** Copy prompts from [COPILOT_PROMPTS.md](COPILOT_PROMPTS.md) and paste into Copilot Chat
-- **Troubleshooting?** See [SETUP_GUIDE.md](SETUP_GUIDE.md)
-- **Full documentation?** See [README.md](README.md)
+Paste this prompt in Copilot Chat:
+
+```
+I've cloned the Copilot Chat Exporter to my computer.
+Now walk me through the complete setup process:
+1. What command do I run first?
+2. What questions will the setup ask me?
+3. How should I answer each question?
+   (I'm in IST timezone, usually working until 6 PM)
+4. What should I do after setup completes?
+
+Please explain each step clearly.
+```
+
+---
+
+## ✅ Step 4: Verify It Works
+
+Paste this prompt in Copilot Chat:
+
+```
+I've completed the setup for Copilot Chat History Exporter.
+How do I verify that everything is working correctly?
+Please tell me:
+1. What command should I run to test it?
+2. What files should be created?
+3. Where will those files be saved?
+4. What should I look for to confirm success?
+```
+
+---
+
+## 📅 Step 5: Schedule Daily Exports
+
+Paste this prompt in Copilot Chat:
+
+```
+After running the setup, I need to schedule daily exports.
+I'm on Windows.
+Guide me through using either:
+- Option A: Right-click and run schedule_daily.bat
+- Option B: Run schedule_daily.ps1 in PowerShell
+- Option C: Manual Task Scheduler setup
+
+Which option is easiest for beginners?
+Can you explain what each option does?
+```
+
+---
+
+## 🎉 Done!
+
+Your Copilot chat history now exports daily to the folder you chose.
+
+---
+
+## 📚 Need More Details?
+
+- **Troubleshooting & Limitations?** See [SETUP_GUIDE.md](SETUP_GUIDE.md)
+- **Learn about output formats?** See [README.md](README.md)
+- **Additional prompts?** See [COPILOT_PROMPTS.md](COPILOT_PROMPTS.md)
+
+---
+
+## 💡 Tips
+
+- **Modify prompts for your setup** — Feel free to change timezone, times, paths
+- **Ask follow-ups in Copilot Chat** — "Explain simpler", "Give an example", etc.
+- **Copy-paste error messages** — Paste any errors into Copilot Chat for help
