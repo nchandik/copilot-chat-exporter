@@ -1,0 +1,12 @@
+# Copilot Chat History Exporter - Python Dependencies
+#
+# This project uses only Python standard library modules.
+# No external packages are required.
+#
+# Supported Python version: 3.7+
+#
+# To verify your Python version:
+#   python --version
+#
+# No pip install needed - just run:
+#   python export_copilot_history.py
