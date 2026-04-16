@@ -152,6 +152,8 @@ def reconfigure():
     
     return interactive_setup()
 
+
+def get_workspace_storage_root():
     """Get the VS Code workspaceStorage root path."""
     appdata = os.getenv("APPDATA")
     if not appdata:
