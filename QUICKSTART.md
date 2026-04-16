@@ -104,7 +104,7 @@ Your Copilot chat history now exports daily to the folder you chose.
 
 - **Troubleshooting & Limitations?** See [SETUP_GUIDE.md](SETUP_GUIDE.md)
 - **Learn about output formats?** See [README.md](README.md)
-- **Additional prompts?** See [COPILOT_PROMPTS.md](COPILOT_PROMPTS.md)
+- **More Copilot prompts?** See "Copilot Chat Prompts" section in [SETUP_GUIDE.md](SETUP_GUIDE.md)
 
 ---
 

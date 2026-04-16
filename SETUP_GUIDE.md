@@ -426,7 +426,132 @@ After a month, you may have many export files. You can:
 
 ---
 
-## 📞 Support
+## � Copilot Chat Prompts (Interactive Help)
+
+Use these prompts in **VS Code Copilot Chat** for guided, interactive help.
+
+### **Prerequisites Check Prompts**
+
+**Prompt 1: Verify all prerequisites**
+```
+I want to use the Copilot Chat History Exporter.
+Help me verify I have all the prerequisites:
+1. What Windows version do I need?
+2. How do I check my Windows version?
+3. How do I check if Python 3.7+ is installed?
+4. How do I check if VS Code has Copilot Chat enabled?
+
+Give me exact steps to verify each requirement.
+```
+
+**Prompt 2: Check Python version**
+```
+How do I check if Python 3.7 or higher is installed on my Windows computer?
+Please give me:
+1. The exact command to run
+2. What output should I look for?
+3. What version numbers are acceptable?
+4. Where do I run this command from?
+```
+
+**Prompt 3: Check VS Code & Copilot Chat**
+```
+How do I check if I have VS Code installed with Copilot Chat?
+Please explain:
+1. Where in VS Code can I find Copilot Chat?
+2. What if I don't see it - what do I need to do?
+3. Is Copilot Chat the same as GitHub Copilot?
+4. Do I need a GitHub account?
+```
+
+### **Installation Prompts**
+
+**Prompt 4: Install Python on Windows**
+```
+I don't have Python installed on my Windows computer.
+Guide me through:
+1. Where do I download Python?
+2. Which Python version should I get (3.7+)?
+3. What options should I select during installation?
+4. How do I verify it installed correctly?
+```
+
+**Prompt 5: Install Copilot Chat in VS Code**
+```
+I have VS Code but don't have Copilot Chat.
+Can you help me:
+1. Find where to install extensions in VS Code?
+2. Search for and install "GitHub Copilot Chat"?
+3. Do I need a paid subscription?
+4. How do I verify it's installed and working?
+```
+
+**Prompt 6: Install Git on Windows**
+```
+Do I need Git installed for the Copilot Chat History Exporter?
+If yes, please guide me:
+1. Where do I download Git?
+2. What settings should I use during installation?
+3. How do I verify Git is installed?
+4. Can I use GitHub Desktop instead?
+```
+
+### **Advanced Prompts**
+
+**Prompt 7: Help me choose output directory**
+```
+I need to choose where to save my exported Copilot chats.
+Here are my options:
+- C:\Users\YourName\Documents\Copilot-History (default)
+- My cloud storage folder (OneDrive/Google Drive)
+- An external drive
+
+Which option is best and why? What are the pros and cons?
+```
+
+**Prompt 8: Help me set the export time**
+```
+I work in IST timezone and want to export my chat history daily.
+What time should I set the export for?
+- I'm usually at my desk until 6:00 PM (18:00)
+- I want the export to happen automatically
+- What happens if I'm not at my desk at that time?
+
+Give me your recommendation with reasons.
+```
+
+**Prompt 9: Set up Windows Task Scheduler**
+```
+After running the setup, I need to schedule daily exports.
+Guide me through using either:
+- Option A: Right-click and run schedule_daily.bat
+- Option B: Run schedule_daily.ps1 in PowerShell
+- Option C: Manual Task Scheduler setup
+
+Which option is easiest for beginners?
+Can you explain what each option does?
+```
+
+**Prompt 10: Troubleshoot "Python not found"**
+```
+When I try to run the exporter, I get an error:
+"'python' is not recognized as an internal or external command"
+
+What does this mean and how do I fix it?
+```
+
+**Prompt 11: Troubleshoot "No session files found"**
+```
+I ran the exporter but got this error:
+"❌ Error finding session files"
+
+Why is this happening? How do I fix it?
+What does "session files" mean?
+```
+
+---
+
+## �📞 Support
 
 **Having issues?**
 1. Check this guide's **Troubleshooting** section
