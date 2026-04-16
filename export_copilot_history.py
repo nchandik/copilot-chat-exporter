@@ -80,9 +80,9 @@ def interactive_setup():
     # Ask for export time (timezone aware)
     print("\n[2]  What time should we export your chat history?")
     print("   (Consider your timezone)")
-    print("   • Indian Standard Time (IST): 18:00 = 6:00 PM")
-    print("   • US Eastern Time (EST): 18:00 = 6:00 PM")
-    print("   • US Pacific Time (PST): 18:00 = 6:00 PM")
+    print("     • Indian Standard Time (IST): 18:00 = 6:00 PM")
+    print("     • US Eastern Time (EST): 18:00 = 6:00 PM")
+    print("     • US Pacific Time (PST): 18:00 = 6:00 PM")
     print("   (Enter in 24-hour format, e.g., 18:00 for 6:00 PM)")
     print("   (Press Enter for default: 23:00 / 11:00 PM)")
     
@@ -101,11 +101,11 @@ def interactive_setup():
 
     # Ask for timezone info (for reference only)
     print("\n[3]  What's your timezone?")
-    print("   • IST (Indian Standard Time, UTC+5:30)")
-    print("   • EST (US Eastern, UTC-5)")
-    print("   • CST (US Central, UTC-6)")
-    print("   • MST (US Mountain, UTC-7)")
-    print("   • PST (US Pacific, UTC-8)")
+    print("     • IST (Indian Standard Time, UTC+5:30)")
+    print("     • EST (US Eastern, UTC-5)")
+    print("     • CST (US Central, UTC-6)")
+    print("     • MST (US Mountain, UTC-7)")
+    print("     • PST (US Pacific, UTC-8)")
     print("   (For reference only, no impact on export time)")
     
     timezone_input = input("   Timezone: ").strip().upper()
@@ -142,7 +142,7 @@ def reconfigure():
     """Allow user to reconfigure settings."""
     existing = load_config()
     if existing:
-        print(f"\n📋 Current config:")
+        print(f"\n Current config:")
         print(f"  Output dir: {existing.get('output_dir')}")
         print(f"  Export time: {existing.get('export_time')}")
         print(f"  Timezone: {existing.get('timezone')}")
@@ -402,7 +402,7 @@ Best-effort extraction from VS Code Copilot chat session files modified on this 
         message = entry['message']
         source_session = entry.get('sourceSession', 'N/A')
 
-        md_content += f"""### Entry {i} — {role}
+        md_content += f"""### Entry {i} - {role}
 
 **Source Session:** `{source_session}`
 
@@ -491,11 +491,11 @@ def check_file_exists_and_prompt(output_dir, target_date):
     md_file = os.path.join(output_dir, f"prompt_response_history_{target_date}.md")
     
     if os.path.exists(json_file) or os.path.exists(md_file):
-        print(f"\n[WARN]️  Files already exist for {target_date}")
+        print(f"\n[WARN]  Files already exist for {target_date}")
         if os.path.exists(json_file):
-            print(f"   • {os.path.basename(json_file)}")
+            print(f"     • {os.path.basename(json_file)}")
         if os.path.exists(md_file):
-            print(f"   • {os.path.basename(md_file)}")
+            print(f"     • {os.path.basename(md_file)}")
         
         while True:
             print("\nWhat would you like to do?")
@@ -627,7 +627,7 @@ def main():
         # Parse all session files
         all_entries = []
         for filepath in session_files:
-            print(f"  • Parsing {os.path.basename(filepath)}...")
+            print(f"    • Parsing {os.path.basename(filepath)}...")
             entries = parse_session_file(filepath)
             all_entries.extend(entries)
 
