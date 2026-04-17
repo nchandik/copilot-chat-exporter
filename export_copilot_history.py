@@ -249,48 +249,8 @@ def parse_session_file(filepath):
         except Exception:
             pass
 
-    # Pass 1: kind 0 (explicit request snapshots)
-    for obj in objs:
-        if not isinstance(obj, dict) or obj.get("kind") != 0:
-            continue
-        v = obj.get("v")
-        if not isinstance(v, dict):
-            continue
-        reqs = v.get("requests")
-        if not isinstance(reqs, list):
-            continue
-        for req in reqs:
-            if not isinstance(req, dict):
-                continue
-
-            msg = req.get("message")
-            user_text = ""
-            if isinstance(msg, dict) and isinstance(msg.get("text"), str):
-                user_text = clean_text(msg.get("text"))
-            elif isinstance(msg, str):
-                user_text = clean_text(msg)
-            if user_text:
-                entries.append({
-                    "role": "user",
-                    "message": user_text,
-                    "sourceSession": session_id,
-                    "source": "kind0.requests.message",
-                    "requestId": req.get("requestId"),
-                    "timestamp": req.get("timestamp"),
-                })
-
-            assistant_text = extract_assistant_response(req.get("response"))
-            if assistant_text:
-                entries.append({
-                    "role": "assistant",
-                    "message": assistant_text,
-                    "sourceSession": session_id,
-                    "source": "kind0.requests.response",
-                    "requestId": req.get("requestId"),
-                    "timestamp": req.get("timestamp"),
-                })
-
-    # Pass 2: kind 1 (rendered user prompts from metadata)
+    # Primary: kind 1 — contains interleaved user prompt + assistant response via toolCallRounds
+    # Each kind1 object represents one complete conversation turn (prompt + response pair).
     for idx, obj in enumerate(objs, 1):
         if not isinstance(obj, dict) or obj.get("kind") != 1:
             continue
@@ -300,59 +260,85 @@ def parse_session_file(filepath):
         md = v.get("metadata")
         if not isinstance(md, dict):
             continue
+
+        # Extract user prompt
         rum = md.get("renderedUserMessage")
-        if not (isinstance(rum, list) and rum and isinstance(rum[0], dict)):
-            continue
-        txt = rum[0].get("text")
-        if not isinstance(txt, str) or not txt.strip():
-            continue
+        user_text = ""
+        if isinstance(rum, list) and rum and isinstance(rum[0], dict):
+            txt = rum[0].get("text", "")
+            if isinstance(txt, str) and txt.strip():
+                m = user_req_re.search(txt)
+                user_text = clean_text(m.group(1) if m else txt)
 
-        m = user_req_re.search(txt)
-        if m:
-            prompt = clean_text(m.group(1))
-        else:
-            prompt = clean_text(txt)
-
-        if prompt:
+        if user_text:
             entries.append({
                 "role": "user",
-                "message": prompt,
+                "message": user_text,
                 "sourceSession": session_id,
-                "source": "kind1.metadata.renderedUserMessage",
+                "source": "kind1.renderedUserMessage",
                 "line": idx,
             })
 
-    # Pass 3: kind 2 (streamed assistant chunks — one object = one complete response)
-    for idx, obj in enumerate(objs, 1):
-        if not isinstance(obj, dict) or obj.get("kind") != 2:
-            continue
-        v = obj.get("v")
-        if not isinstance(v, list):
-            continue
-
-        # Assemble all text chunks within this kind2 object into one complete response
-        text_parts = []
-        req_id = None
-        for chunk in v:
-            if not isinstance(chunk, dict):
+        # Extract assistant response from toolCallRounds — last non-empty round response is the final answer
+        tc_rounds = md.get("toolCallRounds", [])
+        response_parts = []
+        for rnd in tc_rounds:
+            if not isinstance(rnd, dict):
                 continue
-            if req_id is None:
-                req_id = chunk.get("requestId")
-            val = chunk.get("value")
-            if isinstance(val, str) and val.strip():
-                text_parts.append(val)
+            resp = rnd.get("response")
+            if isinstance(resp, str) and resp.strip():
+                response_parts.append(clean_text(resp))
 
-        full_response = clean_text("".join(text_parts))
-        # Filter out tool/file operation messages
-        if full_response and not any(full_response.startswith(s) for s in ("Reading [](", "Running `", "Creating [](", "Created [](")):
+        if response_parts:
+            # Combine all rounds into one complete response
+            full_response = "\n\n".join(response_parts)
             entries.append({
                 "role": "assistant",
                 "message": full_response,
                 "sourceSession": session_id,
-                "source": "kind2.assembled",
+                "source": "kind1.toolCallRounds.response",
                 "line": idx,
-                "requestId": req_id,
             })
+
+    # Fallback: kind 0 — used only if kind1 produced no entries (older session format)
+    if not entries:
+        for obj in objs:
+            if not isinstance(obj, dict) or obj.get("kind") != 0:
+                continue
+            v = obj.get("v")
+            if not isinstance(v, dict):
+                continue
+            reqs = v.get("requests")
+            if not isinstance(reqs, list):
+                continue
+            for req in reqs:
+                if not isinstance(req, dict):
+                    continue
+                msg = req.get("message")
+                user_text = ""
+                if isinstance(msg, dict) and isinstance(msg.get("text"), str):
+                    user_text = clean_text(msg.get("text"))
+                elif isinstance(msg, str):
+                    user_text = clean_text(msg)
+                if user_text:
+                    entries.append({
+                        "role": "user",
+                        "message": user_text,
+                        "sourceSession": session_id,
+                        "source": "kind0.requests.message",
+                        "requestId": req.get("requestId"),
+                        "timestamp": req.get("timestamp"),
+                    })
+                assistant_text = extract_assistant_response(req.get("response"))
+                if assistant_text:
+                    entries.append({
+                        "role": "assistant",
+                        "message": assistant_text,
+                        "sourceSession": session_id,
+                        "source": "kind0.requests.response",
+                        "requestId": req.get("requestId"),
+                        "timestamp": req.get("timestamp"),
+                    })
 
     return entries
 
