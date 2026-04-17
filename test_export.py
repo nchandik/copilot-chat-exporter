@@ -356,11 +356,12 @@ class TestFileOperations(unittest.TestCase):
     def test_file_path_generation(self):
         """Test that file paths are generated correctly."""
         date = "2026-04-16"
-        json_file = f"prompt_response_history_{date}.json"
-        md_file = f"prompt_response_history_{date}.md"
+        json_file = f"chat_history_{date}.json"
+        md_file = f"chat_history_{date}.md"
         
         self.assertIn(date, json_file)
         self.assertIn(date, md_file)
+        self.assertTrue(json_file.startswith("chat_history_"))
         self.assertTrue(json_file.endswith(".json"))
         self.assertTrue(md_file.endswith(".md"))
 
@@ -393,9 +394,9 @@ if __name__ == "__main__":
     # Summary
     print("\n" + "="*70)
     if result.wasSuccessful():
-        print(f"✅ All {result.testsRun} tests PASSED!")
+        print(f"[OK] All {result.testsRun} tests PASSED!")
     else:
-        print(f"❌ {len(result.failures)} failures, {len(result.errors)} errors")
+        print(f"[FAIL] {len(result.failures)} failures, {len(result.errors)} errors")
     print("="*70 + "\n")
     
     sys.exit(0 if result.wasSuccessful() else 1)
