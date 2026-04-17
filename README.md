@@ -235,6 +235,8 @@ Done! Each team member will have their own config and daily exports based on the
 
 ## License
 
+MIT License — Copyright (c) 2026 Satish Chandika
+
 Feel free to modify and share.
 
 ---
