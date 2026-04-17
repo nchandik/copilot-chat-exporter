@@ -90,7 +90,7 @@ python export_copilot_history.py --help
 
 ### Output Format
 
-**JSON** (`prompt_response_history_YYYY-MM-DD.json`):
+**JSON** (`chat_history_YYYY-MM-DD.json`):
 ```json
 {
   "date": "2026-04-16",
@@ -109,9 +109,9 @@ python export_copilot_history.py --help
 }
 ```
 
-**Markdown** (`prompt_response_history_YYYY-MM-DD.md`):
+**Markdown** (`chat_history_YYYY-MM-DD.md`):
 ```markdown
-# Prompt & Response History - 2026-04-16
+# Chat History - 2026-04-16
 
 ### Entry 1 — USER
 
@@ -199,8 +199,8 @@ C:\Users\YourUsername\.copilot_exporter_config.json
 
 **Output files:**
 ```
-[YourConfiguredDirectory]\prompt_response_history_YYYY-MM-DD.json
-[YourConfiguredDirectory]\prompt_response_history_YYYY-MM-DD.md
+[YourConfiguredDirectory]\chat_history_YYYY-MM-DD.json
+[YourConfiguredDirectory]\chat_history_YYYY-MM-DD.md
 ```
 
 ## Sharing with Colleagues

@@ -23,6 +23,9 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 
+OUTPUT_FILE_PREFIX = "chat_history"
+
+
 # ===================== CONFIG MANAGEMENT =====================
 
 def get_config_file():
@@ -369,7 +372,7 @@ def export_to_json(entries, session_files, target_date, output_dir):
         "historyCount": len(entries),
         "history": entries,
     }
-    output_file = os.path.join(output_dir, f"prompt_response_history_{target_date}.json")
+    output_file = os.path.join(output_dir, f"{OUTPUT_FILE_PREFIX}_{target_date}.json")
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=True, indent=2)
     return output_file
@@ -377,7 +380,7 @@ def export_to_json(entries, session_files, target_date, output_dir):
 
 def export_to_markdown(entries, target_date, output_dir):
     """Export consolidated history to Markdown."""
-    md_content = f"""# Prompt & Response History - {target_date}
+    md_content = f"""# Chat History - {target_date}
 
 **Date:** {target_date}
 
@@ -414,7 +417,7 @@ Best-effort extraction from VS Code Copilot chat session files modified on this 
 
 """
 
-    output_file = os.path.join(output_dir, f"prompt_response_history_{target_date}.md")
+    output_file = os.path.join(output_dir, f"{OUTPUT_FILE_PREFIX}_{target_date}.md")
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(md_content)
     return output_file
@@ -487,8 +490,8 @@ def interactive_date_picker():
 
 def check_file_exists_and_prompt(output_dir, target_date):
     """Check if export files exist and prompt user for action."""
-    json_file = os.path.join(output_dir, f"prompt_response_history_{target_date}.json")
-    md_file = os.path.join(output_dir, f"prompt_response_history_{target_date}.md")
+    json_file = os.path.join(output_dir, f"{OUTPUT_FILE_PREFIX}_{target_date}.json")
+    md_file = os.path.join(output_dir, f"{OUTPUT_FILE_PREFIX}_{target_date}.md")
     
     if os.path.exists(json_file) or os.path.exists(md_file):
         print(f"\n[WARN]  Files already exist for {target_date}")

@@ -103,15 +103,15 @@ You should see:
 🕐 Configured export time: 23:00 (IST)
 ✅ Found X session file(s)
 ...
-✅ JSON: C:\...\prompt_response_history_2026-04-16.json
-✅ Markdown: C:\...\prompt_response_history_2026-04-16.md
+✅ JSON: C:\...\chat_history_2026-04-16.json
+✅ Markdown: C:\...\chat_history_2026-04-16.md
 
 🎉 Export complete!
 ```
 
 Check your output directory — you should see:
-- `prompt_response_history_2026-04-16.json` (structured data)
-- `prompt_response_history_2026-04-16.md` (readable format)
+- `chat_history_2026-04-16.json` (structured data)
+- `chat_history_2026-04-16.md` (readable format)
 
 ### **Step 4: Schedule Daily Automation**
 
@@ -188,7 +188,7 @@ python export_copilot_history.py --help
 
 ## 📊 Output Format
 
-### **JSON Format** (`prompt_response_history_2026-04-16.json`)
+### **JSON Format** (`chat_history_2026-04-16.json`)
 
 Structured data with metadata:
 
@@ -217,12 +217,12 @@ Structured data with metadata:
 
 Use for: Parsing, analysis, integrations, APIs
 
-### **Markdown Format** (`prompt_response_history_2026-04-16.md`)
+### **Markdown Format** (`chat_history_2026-04-16.md`)
 
 Human-readable format:
 
 ```markdown
-# Prompt & Response History - 2026-04-16
+# Chat History - 2026-04-16
 
 ### Entry 1 — USER
 
