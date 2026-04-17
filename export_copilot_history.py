@@ -322,29 +322,37 @@ def parse_session_file(filepath):
                 "line": idx,
             })
 
-    # Pass 3: kind 2 (streamed assistant chunks)
+    # Pass 3: kind 2 (streamed assistant chunks — one object = one complete response)
     for idx, obj in enumerate(objs, 1):
         if not isinstance(obj, dict) or obj.get("kind") != 2:
             continue
         v = obj.get("v")
         if not isinstance(v, list):
             continue
+
+        # Assemble all text chunks within this kind2 object into one complete response
+        text_parts = []
+        req_id = None
         for chunk in v:
             if not isinstance(chunk, dict):
                 continue
+            if req_id is None:
+                req_id = chunk.get("requestId")
             val = chunk.get("value")
-            if isinstance(val, str):
-                c = clean_text(val)
-                # Filter out tool/file operation messages
-                if c and not any(c.startswith(s) for s in ("Reading [](", "Running `", "Creating [](", "Created [](")):
-                    entries.append({
-                        "role": "assistant",
-                        "message": c,
-                        "sourceSession": session_id,
-                        "source": "kind2.v[].value",
-                        "line": idx,
-                        "requestId": chunk.get("requestId"),
-                    })
+            if isinstance(val, str) and val.strip():
+                text_parts.append(val)
+
+        full_response = clean_text("".join(text_parts))
+        # Filter out tool/file operation messages
+        if full_response and not any(full_response.startswith(s) for s in ("Reading [](", "Running `", "Creating [](", "Created [](")):
+            entries.append({
+                "role": "assistant",
+                "message": full_response,
+                "sourceSession": session_id,
+                "source": "kind2.assembled",
+                "line": idx,
+                "requestId": req_id,
+            })
 
     return entries
 
