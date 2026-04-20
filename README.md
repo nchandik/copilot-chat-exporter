@@ -1,284 +1,179 @@
 # Copilot Chat History Exporter
 
-Automatically export all your VS Code Copilot chat sessions to JSON and Markdown formats daily.
+Export VS Code Copilot chat sessions to JSON and Markdown on demand or on a daily schedule.
 
 ## Features
 
-✅ **Interactive Setup** — First time asks where to save & what time to export  
-✅ **Run Mode Selection** — Choose automatic daily or manual on-demand export  
-✅ **Timezone-Aware** — Support for IST, EST, CST, MST, PST (and others)  
-✅ **Extracts from all local VS Code Copilot chat sessions**  
-✅ **Consolidates into clean JSON and Markdown formats**  
-✅ **Portable** — works on any Windows system with VS Code  
-✅ **Easy scheduling** via Windows Task Scheduler  
-✅ **No external dependencies** — uses Python stdlib only  
+- Interactive first-run setup
+- Automatic or manual run modes
+- JSON and Markdown output for each export date
+- No third-party Python packages required
+- Windows Task Scheduler support for daily automation
 
 ## Quick Start
 
-### 1. Clone or Download
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/nchandik/copilot-chat-exporter.git
 cd copilot-chat-exporter
 ```
 
-### 2. First Time Setup (Interactive)
-
-Run the interactive setup to configure your preferences:
+### 2. Run first-time setup
 
 ```bash
 python export_copilot_history.py --setup
 ```
 
-You'll be asked:
-- **Where to save chat history files?** (default: `Documents\Copilot-History`)
-- **How to run exports?** (`automatic` daily or `manual` on-demand)
-- **What time to export daily?** (automatic mode only, default: 23:00 / 11:00 PM)
-  - Scheduler time is controlled by Windows Task Scheduler trigger
-- **What's your timezone?** (for reference only)
+Setup asks for:
+- Output directory
+- Default run mode: `automatic` or `manual`
+- Daily export time for automatic mode
+- Timezone for reference
 
-Your preferences are saved to: `~\.copilot_exporter_config.json`
+Configuration is saved to `~\.copilot_exporter_config.json`.
 
-If you choose manual mode, you can export **today or previous dates** when you run the tool.
+### 3. Test one export
 
-### 3. Schedule with Windows Task Scheduler
+```bash
+python export_copilot_history.py
+```
 
-**Option A: Using the batch file (easiest)**
+### 4. Optional: schedule automatic export
 
-1. Right-click `schedule_daily.bat`
-2. Select **"Run as administrator"**
-3. The task will be created automatically ✅
+Automatic export is driven by Windows Task Scheduler, not by VS Code.
 
-**Option B: Using PowerShell**
+Option A: helper script
 
-1. Right-click PowerShell
-2. Select **"Run as Administrator"**
-3. Run: `.\schedule_daily.ps1`
+1. Run `schedule_daily.bat`
+2. If Windows blocks it or the script asks for elevation, rerun it as Administrator
 
-**Option C: Manual setup**
+Option B: PowerShell helper
 
-1. Open **Task Scheduler** (Press `Win + R`, type `taskschd.msc`)
-2. Click **Create Basic Task**
-3. Name: `Copilot Chat History Export`
-4. Trigger: **Daily** at `23:00` (or your preferred time)
-5. Action: **Start a program**
-   - Program: `C:\path\to\python.exe`
-   - Arguments: `C:\path\to\export_copilot_history.py`
-6. Click **OK**
+1. Open PowerShell in this folder
+2. Run `./schedule_daily.ps1`
+3. If the script asks for elevation, rerun PowerShell as Administrator
 
-### Important Notes for Automatic Mode
+Option C: create the task manually
 
-- Automatic export is run by **Windows Task Scheduler**, not by VS Code.
-- The export can run even when VS Code is closed.
-- Automatic mode is **non-interactive** (no date picker or overwrite prompt).
-- In automatic mode, existing output files for that date are overwritten.
-- If there is no chat activity for the selected date, the task still runs but may produce no export entries.
-- Your PC must be on (and not sleeping) at the scheduled time, unless your task settings explicitly allow wake/run behavior.
-- Whether the task runs while signed out depends on Task Scheduler account settings ("Run only when user is logged on" vs "Run whether user is logged on or not").
+1. Open Task Scheduler
+2. Create a daily task named `Copilot Chat History Export`
+3. Set the trigger to your preferred time
+4. Set the action to start `python.exe`
+5. Pass `export_copilot_history.py --scheduled` as the program arguments
 
----
+Important:
+- You do not need Administrator rights to run the exporter itself.
+- Some scheduling helper flows may require Administrator rights depending on local policy or how the helper script is launched.
+- A user-level scheduled task can still work without Administrator rights.
 
 ## Usage
 
-### Command Line
-
 ```bash
-# Run interactive setup (first time)
+# Run setup
 python export_copilot_history.py --setup
 
-# Export today's history (uses saved config)
+# Export using saved config
 python export_copilot_history.py
 
-# Export to specific directory (overrides config)
-python export_copilot_history.py --output-dir "C:\My\Output\Path"
-
-# Export a specific past date
+# Export a specific date
 python export_copilot_history.py --date 2026-04-15
 
-# Reconfigure preferences
-python export_copilot_history.py --setup
-
-# Show help
-python export_copilot_history.py --help
+# Override output directory
+python export_copilot_history.py --output-dir "C:\My\Output\Path"
 
 # Force manual interactive mode
 python export_copilot_history.py --interactive
 
 # Force scheduled non-interactive mode
 python export_copilot_history.py --scheduled
+
+# Show help
+python export_copilot_history.py --help
 ```
 
-Manual mode supports exporting previous dates through the interactive date picker or by using `--date YYYY-MM-DD`.
+Manual mode supports exporting previous dates through the interactive prompt or by passing `--date`.
 
-### Output Format
+## Configuration
 
-**JSON** (`chat_history_YYYY-MM-DD.json`):
-```json
-{
-  "date": "2026-04-16",
-  "sessionFilesCount": 4,
-  "historyCount": 65,
-  "history": [
-    {
-      "role": "user",
-      "message": "your prompt here",
-      "sourceSession": "session-id",
-      "source": "kind0.requests.message",
-      "timestamp": 1234567890
-    },
-    ...
-  ]
-}
-```
+Configuration file: `~\.copilot_exporter_config.json`
 
-**Markdown** (`chat_history_YYYY-MM-DD.md`):
-```markdown
-# Chat History - 2026-04-16
+Example:
 
-### Entry 1 — USER
-
-**Source Session:** `session-id`
-
-**Details:** kind0.requests.message
-
-your prompt here
-
----
-
-### Entry 2 — ASSISTANT
-
-...
-```
-
-## Configuration File
-
-Your preferences are saved to: **`~\.copilot_exporter_config.json`**
-
-Example config:
 ```json
 {
   "output_dir": "C:\\Users\\YourUsername\\Documents\\Copilot-History",
-  "export_time": "23:00",
+  "run_mode": "automatic",
+  "export_time": "20:00",
   "timezone": "IST",
-  "created_at": "2026-04-16T10:30:45.123456",
+  "created_at": "2026-04-20T17:30:00.000000",
   "version": "1.0"
 }
 ```
 
-To reconfigure at any time, run:
+Notes:
+- `run_mode` controls the default behavior.
+- `export_time` matters only for automatic mode.
+- The actual automatic run time is controlled by the Task Scheduler trigger.
+
+## Output
+
+The exporter writes one file pair per date:
+
+- `chat_history_YYYY-MM-DD.json`
+- `chat_history_YYYY-MM-DD.md`
+
+JSON contains structured data. Markdown contains a readable transcript.
+
+## First-Run Validation
+
+1. Run `python export_copilot_history.py --setup`
+2. Confirm `run_mode` in `~\.copilot_exporter_config.json`
+3. Run `python export_copilot_history.py --interactive`
+4. Confirm both output files were created
+5. If using automatic mode, run the scheduled task once and confirm it succeeds
+
+## Troubleshooting
+
+`First time setup required`
+
+Run:
+
 ```bash
 python export_copilot_history.py --setup
 ```
 
-## How It Works
+`No session files found`
 
-The script:
+- Make sure Copilot Chat was used for the target date
+- Confirm VS Code session data exists under `%APPDATA%\Code\User\workspaceStorage`
 
-1. **Loads or creates config** (first run asks for preferences)
-2. **Finds today's session files** in `%APPDATA%\Code\User\workspaceStorage\*\chatSessions\*.jsonl`
-3. **Parses JSONL format** to extract:
-   - User prompts (from `kind0` request snapshots and `kind1` metadata)
-   - Assistant responses (from `kind0` response arrays and `kind2` streaming chunks)
-4. **Deduplicates** identical entries
-5. **Exports** consolidated history to JSON and Markdown
-6. **Saves** to configured directory with today's date in filename
+`Permission denied`
 
-## Troubleshooting
+- Check that the output directory is writable
+- Try an absolute output path
+- Use Administrator only if the specific scheduling helper requires it
 
-**"First time setup required"**
-→ This is normal! Run `python export_copilot_history.py --setup` first.
+`Scheduled task does not run`
 
-**"No session files found"**
-→ Ensure VS Code has been used today (chat sessions must exist for today's date).
+- Run the task manually once from Task Scheduler
+- Verify the Python path and script arguments in the task
+- Check whether the machine was asleep or signed out when the task was due to run
 
-**"APPDATA environment variable not set"**
-→ This is very rare on Windows. Check your system environment variables.
+## Sharing With Colleagues
 
-**"Permission denied" errors**
-→ Run as Administrator (right-click Command Prompt → Run as administrator)
+Team members can clone the repository and run their own setup locally.
 
-**Output files not created**
-→ Check that the output directory is writable
-→ Try specifying an absolute path instead of relative path
-
-**Task Scheduler not running the export**
-→ Right-click the task in Task Scheduler and select "Run" to test manually
-→ Check Task Scheduler logs for errors
-
-## First-Run Validation Checklist
-
-1. Run `python export_copilot_history.py --setup`.
-2. Verify `run_mode` in `~/.copilot_exporter_config.json`.
-3. Run one manual export (`python export_copilot_history.py --interactive`) and verify output files are created.
-4. If using automatic mode, create the Task Scheduler task and test it with Task Scheduler's **Run** action.
-
-## Privacy & Data Handling
-
-- Exported files can contain sensitive prompts and responses.
-- Store exports in a secure directory and apply your normal data handling policy before sharing.
-
-## File Locations
-
-The script automatically finds:
-
-**VS Code sessions:**
-```
-C:\Users\YourUsername\AppData\Roaming\Code\User\workspaceStorage\
-```
-
-**Config file:**
-```
-C:\Users\YourUsername\.copilot_exporter_config.json
-```
-
-**Output files:**
-```
-[YourConfiguredDirectory]\chat_history_YYYY-MM-DD.json
-[YourConfiguredDirectory]\chat_history_YYYY-MM-DD.md
-```
-
-## Sharing with Colleagues
-
-1. **Create a repo** (GitHub, GitLab, etc.) with these files
-2. **Have colleagues clone it** to their machines:
-   ```bash
-  git clone https://github.com/nchandik/copilot-chat-exporter.git
-   cd copilot-chat-exporter
-   ```
-3. **Use the repo as provided** for setup and export.
-  - Do **not** push changes directly to `main` in `nchandik/copilot-chat-exporter`.
-  - If someone needs to modify the tool, they should work in their own fork or branch.
-4. **Each person runs:**
-   ```bash
-   python export_copilot_history.py --setup
-   ```
-5. **Then:**
-   ```bash
-   schedule_daily.bat (as Administrator)
-   ```
-   Or:
-   ```bash
-   .\schedule_daily.ps1 (in PowerShell, as Administrator)
-   ```
-
-Done! Each team member will have their own config and daily exports based on their timezone.
+- Do not push personal changes directly to `main` in `nchandik/copilot-chat-exporter`
+- Use a fork or a separate branch for changes
+- Each user gets a local config file and local scheduled task
 
 ## Requirements
 
 - Windows 10 or later
 - Python 3.7+
-- VS Code with Copilot Chat enabled
-- No pip packages needed (uses only Python stdlib)
+- VS Code with Copilot Chat
 
-## License
+## More Detail
 
-MIT License — Copyright (c) 2026 Satish Chandika
-
-Feel free to modify and share.
-
----
-
-**Questions?** Check the `QUICKSTART.md` or run:
-```bash
-python export_copilot_history.py --help
-```
+See `SETUP_GUIDE.md` for the full setup flow and `FAQ.md` for behavior questions.

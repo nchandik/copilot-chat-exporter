@@ -1,5 +1,13 @@
 # Copilot Chat History Exporter FAQ
 
+## Do I need Administrator rights to use the exporter?
+
+No. The exporter itself does not require Administrator rights.
+
+- Manual exports work without Administrator rights.
+- Automatic export can also work without Administrator rights if the scheduled task is created for the current user.
+- Some helper scripts may ask for Administrator rights depending on how they are launched or how Windows policy is configured.
+
 ## Can I use both automatic and manual export?
 
 Yes. `run_mode` sets the default behavior, but you can still use either mode when needed.
