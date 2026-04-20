@@ -34,3 +34,10 @@ Windows Task Scheduler controls the actual automatic run time. The exporter conf
 ## Do I get multiple files for the same day?
 
 No, not by default. The exporter uses one JSON file and one Markdown file per day, so later runs for the same day replace earlier ones.
+
+## Should users push their own changes to this repository's main branch?
+
+No. Users should clone `nchandik/copilot-chat-exporter` to use the exporter, but they should not push changes directly to `main`.
+
+- If they need personal changes, they should use their own fork.
+- If they are collaborating on enhancements, they should work in a separate branch and follow the normal review process.

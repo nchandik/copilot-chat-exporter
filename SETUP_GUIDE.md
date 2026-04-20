@@ -39,11 +39,13 @@ If you see `3.7.0` or higher, you're good! If not, [download Python](https://www
 ### **Step 1: Clone the Repository**
 
 ```bash
-git clone https://github.com/[your-github-username]/copilot-chat-exporter.git
+git clone https://github.com/nchandik/copilot-chat-exporter.git
 cd copilot-chat-exporter
 ```
 
 Or download the ZIP file from GitHub and extract it.
+
+If you are using this repository from `nchandik/copilot-chat-exporter`, do **not** push changes directly to `main`. If you need to customize the tool, use your own fork or a separate branch.
 
 ### **Step 2: Run Interactive Setup (First Time Only)**
 
@@ -605,7 +607,7 @@ What does "session files" mean?
 **Having issues?**
 1. Check this guide's **Troubleshooting** section
 2. Run `python export_copilot_history.py --help`
-3. Check [GitHub Issues](https://github.com/[your-github-username]/copilot-chat-exporter/issues)
+3. Check [GitHub Issues](https://github.com/nchandik/copilot-chat-exporter/issues)
 
 **Want to contribute?**
 - Submit pull requests or issues on GitHub
