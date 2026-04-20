@@ -489,15 +489,42 @@ def calculate_date_from_days_ago(days_ago, timezone=None):
 
 
 def parse_custom_date(date_str):
-    """Parse and validate a custom date string."""
-    try:
-        dt = datetime.strptime(date_str, "%Y-%m-%d")
-        # Check if date is in the future
-        if dt > datetime.now():
-            raise ValueError("Date is in the future")
-        return dt.strftime("%Y-%m-%d")
-    except ValueError as e:
-        raise ValueError(f"Invalid date: {e}")
+    """Parse and validate a custom date string.
+
+    Accepted input formats are normalized to YYYY-MM-DD.
+    """
+    accepted_formats = [
+        "%Y-%m-%d",      # 2026-04-17
+        "%Y/%m/%d",      # 2026/04/17
+        "%m/%d/%Y",      # 04/17/2026
+        "%B %d, %Y",     # April 17, 2026
+        "%b %d, %Y",     # Apr 17, 2026
+        "%B %d %Y",      # April 17 2026
+        "%b %d %Y",      # Apr 17 2026
+    ]
+
+    raw = (date_str or "").strip()
+    if not raw:
+        raise ValueError("Invalid date: empty input")
+
+    dt = None
+    for fmt in accepted_formats:
+        try:
+            dt = datetime.strptime(raw, fmt)
+            break
+        except ValueError:
+            continue
+
+    if dt is None:
+        raise ValueError(
+            "Invalid date format. Use one of: YYYY-MM-DD, YYYY/MM/DD, MM/DD/YYYY, April 17, 2026"
+        )
+
+    # Check if date is in the future
+    if dt > datetime.now():
+        raise ValueError("Invalid date: Date is in the future")
+
+    return dt.strftime("%Y-%m-%d")
 
 
 def interactive_date_picker():
@@ -529,13 +556,13 @@ def interactive_date_picker():
         elif choice == "4":
             return week_ago.strftime("%Y-%m-%d")
         elif choice == "5":
-            print("Enter date (YYYY-MM-DD): ", end="")
+            print("Enter date (e.g., YYYY-MM-DD, YYYY/MM/DD, MM/DD/YYYY): ", end="")
             custom = input().strip()
             try:
                 return parse_custom_date(custom)
             except ValueError as e:
                 print(f"[ERROR] {e}")
-                print("Enter date (YYYY-MM-DD): ", end="")
+                print("Enter date (e.g., YYYY-MM-DD, YYYY/MM/DD, MM/DD/YYYY): ", end="")
                 continue
         else:
             print("[ERROR] Invalid choice. Please enter 1-5: ", end="")

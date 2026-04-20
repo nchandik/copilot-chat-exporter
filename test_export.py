@@ -517,6 +517,18 @@ class TestParseCustomDate(unittest.TestCase):
         result = exp.parse_custom_date("2023-06-01")
         self.assertEqual(result, "2023-06-01")
 
+    def test_accepts_yyyy_slash_mm_slash_dd(self):
+        result = exp.parse_custom_date("2026/04/17")
+        self.assertEqual(result, "2026-04-17")
+
+    def test_accepts_mm_slash_dd_slash_yyyy(self):
+        result = exp.parse_custom_date("04/17/2026")
+        self.assertEqual(result, "2026-04-17")
+
+    def test_accepts_month_name_format(self):
+        result = exp.parse_custom_date("April 17, 2026")
+        self.assertEqual(result, "2026-04-17")
+
 
 # ─────────────────────────────────────────────
 # 11. find_session_files
