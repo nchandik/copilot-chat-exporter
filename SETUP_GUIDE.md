@@ -51,7 +51,7 @@ Or download the ZIP file from GitHub and extract it.
 python export_copilot_history.py --setup
 ```
 
-You'll be asked 3 questions:
+You'll be asked 3 or 4 questions (depends on run mode):
 
 **Question 1: Where to save files?**
 ```
@@ -64,7 +64,14 @@ Example paths:
 - `C:\MyBackup\CopilotChats`
 - `D:\Copilot-History`
 
-**Question 2: What time to export daily?**
+**Question 2: How do you want to run exports?**
+```
+1) Automatic daily (scheduled)
+2) Manual on demand
+Default: 1
+```
+
+**Question 3: What time to export daily?** (automatic mode only)
 ```
 Enter in HH:MM format (24-hour)
 Default: 23:00 (11:00 PM)
@@ -78,13 +85,15 @@ Consider your timezone:
 - **MST (US Mountain):** 18:00 = 6:00 PM
 - **PST (US Pacific):** 18:00 = 6:00 PM
 
-**Question 3: What's your timezone?**
+**Question 4: What's your timezone?**
 ```
 Choose: IST, EST, CST, MST, or PST
 (For reference only, doesn't affect export time)
 ```
 
 ✅ **Your configuration is saved to:** `C:\Users\YourName\.copilot_exporter_config.json`
+
+If you choose manual mode, you can export **today or previous dates** each time you run the tool.
 
 ---
 
@@ -142,6 +151,19 @@ Check your output directory — you should see:
    - **Arguments:** `C:\path\to\export_copilot_history.py`
 6. Click **OK**
 
+### **Important Notes for Automatic Mode**
+
+- Automatic export is triggered by **Windows Task Scheduler**, not by VS Code.
+- The task can run even if VS Code is closed.
+- Automatic mode is **non-interactive** (no date picker, no overwrite prompt).
+- Existing files for the target date are overwritten in automatic mode.
+- If there are no chat sessions for the selected date, the task still runs but may export no entries.
+- Your computer must be on (and not sleeping) at the scheduled time, unless task settings are configured to wake/run.
+- Running while signed out depends on Task Scheduler settings:
+  - **Run only when user is logged on**
+  - **Run whether user is logged on or not**
+- **Source of truth for automatic run time:** Task Scheduler trigger time.
+
 ---
 
 ## 📖 How to Use
@@ -153,6 +175,8 @@ python export_copilot_history.py
 ```
 
 Exports today's chat history using your saved configuration.
+
+In manual mode, you can also export previous dates by selecting them in the interactive date picker or by using `--date YYYY-MM-DD`.
 
 ### **Export a Specific Past Date**
 
@@ -182,6 +206,16 @@ Runs setup again to change output directory, time, or timezone.
 
 ```bash
 python export_copilot_history.py --help
+```
+
+### **Force Manual/Automatic Mode**
+
+```bash
+# Force manual interactive mode
+python export_copilot_history.py --interactive
+
+# Force scheduled non-interactive mode
+python export_copilot_history.py --scheduled
 ```
 
 ---
@@ -304,6 +338,21 @@ Use for: Reading, sharing, documentation
 ---
 
 ## 🔍 Troubleshooting
+
+## ✅ First-Run Validation Checklist
+
+1. Run `python export_copilot_history.py --setup`.
+2. Open `C:\Users\YourName\.copilot_exporter_config.json` and verify `run_mode`.
+3. Run one manual test export (`python export_copilot_history.py --interactive`).
+4. Confirm both files exist:
+  - `chat_history_YYYY-MM-DD.json`
+  - `chat_history_YYYY-MM-DD.md`
+5. If using automatic mode, create the Task Scheduler task and run it once from Task Scheduler to verify.
+
+## 🔐 Privacy & Data Handling
+
+- Exported chat files can include sensitive prompts and responses.
+- Save outputs in a secured location and share only per your team's data handling policy.
 
 ### **"Python not found"**
 

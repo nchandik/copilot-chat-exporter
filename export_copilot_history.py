@@ -24,6 +24,8 @@ from pathlib import Path
 
 
 OUTPUT_FILE_PREFIX = "chat_history"
+RUN_MODE_AUTOMATIC = "automatic"
+RUN_MODE_MANUAL = "manual"
 
 
 # ===================== CONFIG MANAGEMENT =====================
@@ -40,10 +42,39 @@ def load_config():
     if os.path.exists(config_file):
         try:
             with open(config_file, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                loaded = json.load(f)
+                return normalize_config(loaded)
         except Exception:
             return None
     return None
+
+
+def normalize_config(config):
+    """Normalize config fields and backfill defaults for older versions."""
+    if not isinstance(config, dict):
+        return None
+
+    normalized = dict(config)
+    run_mode = str(normalized.get("run_mode", RUN_MODE_AUTOMATIC)).strip().lower()
+    if run_mode not in (RUN_MODE_AUTOMATIC, RUN_MODE_MANUAL):
+        run_mode = RUN_MODE_AUTOMATIC
+    normalized["run_mode"] = run_mode
+
+    if run_mode == RUN_MODE_AUTOMATIC:
+        export_time = normalized.get("export_time")
+        if not isinstance(export_time, str) or not export_time.strip():
+            normalized["export_time"] = "23:00"
+    else:
+        normalized["export_time"] = None
+
+    timezone = normalized.get("timezone")
+    if not isinstance(timezone, str) or not timezone.strip():
+        normalized["timezone"] = "IST"
+
+    if "version" not in normalized:
+        normalized["version"] = "1.1"
+
+    return normalized
 
 
 def save_config(config):
@@ -80,30 +111,48 @@ def interactive_setup():
     # Create directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
 
-    # Ask for export time (timezone aware)
-    print("\n[2]  What time should we export your chat history?")
-    print("   (Consider your timezone)")
-    print("     • Indian Standard Time (IST): 18:00 = 6:00 PM")
-    print("     • US Eastern Time (EST): 18:00 = 6:00 PM")
-    print("     • US Pacific Time (PST): 18:00 = 6:00 PM")
-    print("   (Enter in 24-hour format, e.g., 18:00 for 6:00 PM)")
-    print("   (Press Enter for default: 23:00 / 11:00 PM)")
-    
-    user_time = input("   Time (HH:MM): ").strip()
-    
-    if not user_time:
-        export_time = "23:00"
+    # Ask for run mode
+    print("\n[2]  How do you want to run exports?")
+    print("     1) Automatic daily (scheduled)")
+    print("     2) Manual on demand")
+    print("   (Press Enter for default: 1)")
+
+    user_mode = input("   Mode (1/2): ").strip()
+    if user_mode in ("", "1"):
+        run_mode = RUN_MODE_AUTOMATIC
+    elif user_mode == "2":
+        run_mode = RUN_MODE_MANUAL
     else:
-        # Validate time format
-        try:
-            datetime.strptime(user_time, "%H:%M")
-            export_time = user_time
-        except ValueError:
-            print("   [WARN] Invalid format. Using default: 23:00")
+        print("   [WARN] Invalid choice. Using default: Automatic daily")
+        run_mode = RUN_MODE_AUTOMATIC
+
+    export_time = None
+    if run_mode == RUN_MODE_AUTOMATIC:
+        # Ask for export time (timezone aware)
+        print("\n[3]  What time should we export your chat history?")
+        print("   (Consider your timezone)")
+        print("     • Indian Standard Time (IST): 18:00 = 6:00 PM")
+        print("     • US Eastern Time (EST): 18:00 = 6:00 PM")
+        print("     • US Pacific Time (PST): 18:00 = 6:00 PM")
+        print("   (Enter in 24-hour format, e.g., 18:00 for 6:00 PM)")
+        print("   (Press Enter for default: 23:00 / 11:00 PM)")
+
+        user_time = input("   Time (HH:MM): ").strip()
+
+        if not user_time:
             export_time = "23:00"
+        else:
+            # Validate time format
+            try:
+                datetime.strptime(user_time, "%H:%M")
+                export_time = user_time
+            except ValueError:
+                print("   [WARN] Invalid format. Using default: 23:00")
+                export_time = "23:00"
 
     # Ask for timezone info (for reference only)
-    print("\n[3]  What's your timezone?")
+    question_num = "4" if run_mode == RUN_MODE_AUTOMATIC else "3"
+    print(f"\n[{question_num}]  What's your timezone?")
     print("     • IST (Indian Standard Time, UTC+5:30)")
     print("     • EST (US Eastern, UTC-5)")
     print("     • CST (US Central, UTC-6)")
@@ -119,9 +168,10 @@ def interactive_setup():
     config = {
         "output_dir": output_dir,
         "export_time": export_time,
+        "run_mode": run_mode,
         "timezone": timezone_input,
         "created_at": datetime.now().isoformat(),
-        "version": "1.0"
+        "version": "1.1"
     }
 
     # Save config
@@ -132,11 +182,20 @@ def interactive_setup():
     print("="*50)
     print(f"\nYour preferences:")
     print(f"  [DIR] Output directory: {output_dir}")
-    print(f"  [TIME] Export time: {export_time} daily ({timezone_input})")
+    print(f"  [MODE] Run mode: {run_mode}")
+    if run_mode == RUN_MODE_AUTOMATIC:
+        print(f"  [TIME] Export time: {export_time} daily ({timezone_input})")
+    else:
+        print(f"  [TIME] Manual mode (no scheduled time)")
     print(f"\nConfig saved to: {get_config_file()}")
-    print("\n[SKIP]  Next step: Set up Windows Task Scheduler")
-    print("   Run: schedule_daily.bat (as Administrator)")
-    print("   Or:  schedule_daily.ps1 (in PowerShell, as Administrator)")
+    if run_mode == RUN_MODE_AUTOMATIC:
+        print("\n[SKIP]  Next step: Set up Windows Task Scheduler")
+        print("   Run: schedule_daily.bat (as Administrator)")
+        print("   Or:  schedule_daily.ps1 (in PowerShell, as Administrator)")
+    else:
+        print("\n[SKIP]  Next step: Run exports manually when needed")
+        print("   Run: python export_copilot_history.py")
+        print("   Manual mode lets you export today or previous dates during each run")
 
     return config
 
@@ -147,6 +206,7 @@ def reconfigure():
     if existing:
         print(f"\n Current config:")
         print(f"  Output dir: {existing.get('output_dir')}")
+        print(f"  Run mode: {existing.get('run_mode', RUN_MODE_AUTOMATIC)}")
         print(f"  Export time: {existing.get('export_time')}")
         print(f"  Timezone: {existing.get('timezone')}")
         confirm = input("\nReconfigure? (y/n): ").strip().lower()
@@ -482,12 +542,16 @@ def interactive_date_picker():
             continue
 
 
-def check_file_exists_and_prompt(output_dir, target_date):
+def check_file_exists_and_prompt(output_dir, target_date, non_interactive=False):
     """Check if export files exist and prompt user for action."""
     json_file = os.path.join(output_dir, f"{OUTPUT_FILE_PREFIX}_{target_date}.json")
     md_file = os.path.join(output_dir, f"{OUTPUT_FILE_PREFIX}_{target_date}.md")
     
     if os.path.exists(json_file) or os.path.exists(md_file):
+        if non_interactive:
+            print(f"[INFO] Existing files found for {target_date}; overwriting in non-interactive mode")
+            return True
+
         print(f"\n[WARN]  Files already exist for {target_date}")
         if os.path.exists(json_file):
             print(f"     • {os.path.basename(json_file)}")
@@ -541,7 +605,21 @@ def main():
         action="store_true",
         help="Run interactive setup (reconfigure preferences)",
     )
+    parser.add_argument(
+        "--interactive",
+        action="store_true",
+        help="Force interactive mode (prompts for date/overwrite)",
+    )
+    parser.add_argument(
+        "--scheduled",
+        action="store_true",
+        help="Force non-interactive scheduled mode (defaults to today, overwrites existing files)",
+    )
     args = parser.parse_args()
+
+    if args.interactive and args.scheduled:
+        print("[ERROR] --interactive and --scheduled cannot be used together")
+        sys.exit(1)
 
     # Handle setup mode
     if args.setup:
@@ -553,6 +631,14 @@ def main():
     if config is None:
         print("\n[SETUP] First time setup required...\n")
         config = interactive_setup()
+
+    run_mode = config.get("run_mode", RUN_MODE_AUTOMATIC)
+    if args.interactive:
+        run_mode = RUN_MODE_MANUAL
+    elif args.scheduled:
+        run_mode = RUN_MODE_AUTOMATIC
+
+    is_non_interactive = run_mode == RUN_MODE_AUTOMATIC
 
     # Validate command line arguments
     if args.days_ago is not None and args.days_ago < 0:
@@ -582,8 +668,12 @@ def main():
             print(f"[ERROR] {e}")
             sys.exit(1)
     else:
-        # Interactive mode: ask user which date
-        target_dates.append(interactive_date_picker())
+        if is_non_interactive:
+            # Automatic mode defaults to today's date without prompts.
+            target_dates.append(calculate_date_from_days_ago(0))
+        else:
+            # Manual mode prompts for target date.
+            target_dates.append(interactive_date_picker())
 
     # Determine output directory (command-line arg overrides config)
     if args.output_dir:
@@ -600,10 +690,15 @@ def main():
         print(f"[DATE] Exporting Copilot chat history for {target_date}")
         print(f"{'='*60}")
         print(f"[DIR] Output directory: {output_dir}")
+        if is_non_interactive:
+            print(f"[MODE] Scheduled/non-interactive")
+            print(f"[TIME] Task Scheduler trigger time is the source of truth")
+        else:
+            print(f"[MODE] Manual/interactive")
         print(f"[TIME] Configured export time: {config.get('export_time')} ({config.get('timezone')})")
 
         # Check if files exist
-        if not check_file_exists_and_prompt(output_dir, target_date):
+        if not check_file_exists_and_prompt(output_dir, target_date, non_interactive=is_non_interactive):
             print(f"[SKIP]  Skipping {target_date}")
             continue
 

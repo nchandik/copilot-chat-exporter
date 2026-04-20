@@ -604,6 +604,39 @@ class TestConfigManagement(unittest.TestCase):
                 result = exp.load_config()
         self.assertIsNone(result)
 
+    def test_load_config_backfills_run_mode_default(self):
+        with tempfile.TemporaryDirectory() as d:
+            config_path = os.path.join(d, "cfg.json")
+            with open(config_path, "w", encoding="utf-8") as f:
+                json.dump({"output_dir": d, "timezone": "IST", "export_time": "18:00"}, f)
+            with patch.object(exp, "get_config_file", return_value=config_path):
+                result = exp.load_config()
+        self.assertEqual(result["run_mode"], exp.RUN_MODE_AUTOMATIC)
+
+
+class TestRunModeBehavior(unittest.TestCase):
+
+    def test_normalize_manual_mode_clears_export_time(self):
+        cfg = {"run_mode": "manual", "export_time": "18:00", "timezone": "IST"}
+        normalized = exp.normalize_config(cfg)
+        self.assertEqual(normalized["run_mode"], exp.RUN_MODE_MANUAL)
+        self.assertIsNone(normalized["export_time"])
+
+    def test_normalize_invalid_mode_defaults_to_automatic(self):
+        cfg = {"run_mode": "invalid-mode", "timezone": "IST"}
+        normalized = exp.normalize_config(cfg)
+        self.assertEqual(normalized["run_mode"], exp.RUN_MODE_AUTOMATIC)
+        self.assertEqual(normalized["export_time"], "23:00")
+
+    def test_non_interactive_overwrites_existing_files(self):
+        with tempfile.TemporaryDirectory() as d:
+            target_date = "2026-04-20"
+            json_path = os.path.join(d, f"{exp.OUTPUT_FILE_PREFIX}_{target_date}.json")
+            Path(json_path).write_text("{}", encoding="utf-8")
+            self.assertTrue(
+                exp.check_file_exists_and_prompt(d, target_date, non_interactive=True)
+            )
+
 
 # ─────────────────────────────────────────────
 # Main
@@ -624,6 +657,7 @@ if __name__ == "__main__":
     suite.addTests(loader.loadTestsFromTestCase(TestParseCustomDate))
     suite.addTests(loader.loadTestsFromTestCase(TestFindSessionFiles))
     suite.addTests(loader.loadTestsFromTestCase(TestConfigManagement))
+    suite.addTests(loader.loadTestsFromTestCase(TestRunModeBehavior))
 
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)

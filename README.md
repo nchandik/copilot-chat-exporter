@@ -5,6 +5,7 @@ Automatically export all your VS Code Copilot chat sessions to JSON and Markdown
 ## Features
 
 ✅ **Interactive Setup** — First time asks where to save & what time to export  
+✅ **Run Mode Selection** — Choose automatic daily or manual on-demand export  
 ✅ **Timezone-Aware** — Support for IST, EST, CST, MST, PST (and others)  
 ✅ **Extracts from all local VS Code Copilot chat sessions**  
 ✅ **Consolidates into clean JSON and Markdown formats**  
@@ -31,11 +32,14 @@ python export_copilot_history.py --setup
 
 You'll be asked:
 - **Where to save chat history files?** (default: `Documents\Copilot-History`)
-- **What time to export daily?** (default: 23:00 / 11:00 PM)
-  - Consider your timezone (IST, EST, CST, MST, PST)
+- **How to run exports?** (`automatic` daily or `manual` on-demand)
+- **What time to export daily?** (automatic mode only, default: 23:00 / 11:00 PM)
+  - Scheduler time is controlled by Windows Task Scheduler trigger
 - **What's your timezone?** (for reference only)
 
 Your preferences are saved to: `~\.copilot_exporter_config.json`
+
+If you choose manual mode, you can export **today or previous dates** when you run the tool.
 
 ### 3. Schedule with Windows Task Scheduler
 
@@ -62,6 +66,16 @@ Your preferences are saved to: `~\.copilot_exporter_config.json`
    - Arguments: `C:\path\to\export_copilot_history.py`
 6. Click **OK**
 
+### Important Notes for Automatic Mode
+
+- Automatic export is run by **Windows Task Scheduler**, not by VS Code.
+- The export can run even when VS Code is closed.
+- Automatic mode is **non-interactive** (no date picker or overwrite prompt).
+- In automatic mode, existing output files for that date are overwritten.
+- If there is no chat activity for the selected date, the task still runs but may produce no export entries.
+- Your PC must be on (and not sleeping) at the scheduled time, unless your task settings explicitly allow wake/run behavior.
+- Whether the task runs while signed out depends on Task Scheduler account settings ("Run only when user is logged on" vs "Run whether user is logged on or not").
+
 ---
 
 ## Usage
@@ -86,7 +100,15 @@ python export_copilot_history.py --setup
 
 # Show help
 python export_copilot_history.py --help
+
+# Force manual interactive mode
+python export_copilot_history.py --interactive
+
+# Force scheduled non-interactive mode
+python export_copilot_history.py --scheduled
 ```
+
+Manual mode supports exporting previous dates through the interactive date picker or by using `--date YYYY-MM-DD`.
 
 ### Output Format
 
@@ -182,6 +204,18 @@ The script:
 **Task Scheduler not running the export**
 → Right-click the task in Task Scheduler and select "Run" to test manually
 → Check Task Scheduler logs for errors
+
+## First-Run Validation Checklist
+
+1. Run `python export_copilot_history.py --setup`.
+2. Verify `run_mode` in `~/.copilot_exporter_config.json`.
+3. Run one manual export (`python export_copilot_history.py --interactive`) and verify output files are created.
+4. If using automatic mode, create the Task Scheduler task and test it with Task Scheduler's **Run** action.
+
+## Privacy & Data Handling
+
+- Exported files can contain sensitive prompts and responses.
+- Store exports in a secure directory and apply your normal data handling policy before sharing.
 
 ## File Locations
 
