@@ -31,6 +31,19 @@ Because scheduled jobs must run without stopping for prompts, while manual runs 
 
 Windows Task Scheduler controls the actual automatic run time. The exporter config stores your preferred mode and related settings.
 
+## What date format should I use for manual or custom date export?
+
+The exporter accepts these common input formats and normalizes them internally to YYYY-MM-DD:
+
+- YYYY-MM-DD (example: 2026-04-17)
+- YYYY/MM/DD (example: 2026/04/17)
+- MM/DD/YYYY (example: 04/17/2026)
+- Month name forms (example: April 17, 2026 or Apr 17, 2026)
+
+## Why does 17-04-2026 show as invalid?
+
+17-04-2026 is DD-MM-YYYY format, which is not currently in the accepted set. This is intentional to avoid ambiguity across regions.
+
 ## Do I get multiple files for the same day?
 
 No, not by default. The exporter uses one JSON file and one Markdown file per day, so later runs for the same day replace earlier ones.
